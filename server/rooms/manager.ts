@@ -53,3 +53,9 @@ export const joinRoom = (code: string, user: User): GameState | null => {
   }
   return room;
 };
+
+export const getRoom = (code: string): GameState | null => {
+  const room = rooms.get(code);
+  if (!room) return null;
+  return room;
+};
