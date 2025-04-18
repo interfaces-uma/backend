@@ -3,6 +3,7 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "node:http";
 import cors from "cors";
+import { createRoom, getRoom } from "./rooms/manager";
 
 const port = 3001;
 
@@ -18,14 +19,21 @@ const io = new Server(server, {
   },
 });
 
+createRoom("1234", {
+  name: "miguel",
+  color: "red",
+  id: "miguel1234",
+  role: "agent",
+});
+
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
-  socket.on("send_message", (data) => {
-    socket.broadcast.emit("receive_message", data);
-  });
-
   socket.on("sendMessage", (data) => {
-    console.log(data);
+    const state = getRoom("1234");
+    console.log(state);
+    state?.messages.push(data);
+    console.log(state);
+    io.emit("updateState", state);
   });
 });
 
