@@ -1,0 +1,55 @@
+import type { GameState, User } from "../types";
+
+const rooms = new Map<string, GameState>();
+
+export const createRoom = (code: string, user: User): GameState => {
+  const initialState: GameState = {
+    code,
+    user: {
+      id: "",
+      name: "",
+      color: null,
+      role: null,
+    },
+    players: [user],
+    teams: {
+      blue: {
+        leader: {
+          id: "",
+          name: "",
+          color: "blue",
+          role: "leader",
+        },
+        agents: [],
+      },
+      red: {
+        leader: {
+          id: "",
+          name: "",
+          color: "red",
+          role: "leader",
+        },
+        agents: [],
+      },
+    },
+    cards: [],
+    turn: {
+      team: "red",
+      role: "leader",
+    },
+    clue: null,
+    messages: [],
+  };
+  rooms.set(code, initialState);
+
+  return initialState;
+};
+
+export const joinRoom = (code: string, user: User): GameState | null => {
+  const room = rooms.get(code);
+  if (!room) return null;
+  if (!room.players.find((p) => p.id === user.id)) {
+    room.players.push(user);
+  }
+  return room;
+};
