@@ -26,7 +26,7 @@ app.post("/webhook", (req, res) => {
       }
       console.log("stdout: ", stdout);
       res.status(200).send("hook recieved");
-    },
+    }
   );
 });
 
@@ -97,6 +97,29 @@ io.on("connection", (socket) => {
 
       io.to(roomCode).emit("updateState", state);
     }
+  });
+
+  socket.on("joinTeam", ({ user, color, role }, roomCode) => {
+    const state = getRoom(roomCode);
+    if (!state) return;
+
+    const team = state.teams[color as "red" | "blue"];
+
+    for (const teamColor of ["red", "blue"]) {
+      const t = state.teams[teamColor as "red" | "blue"];
+      if (t.leader?.id === user.id) {
+        t.leader = null;
+      }
+      t.agents = t.agents.filter((agent) => agent.id !== user.id);
+    }
+
+    if (role === "leader") {
+      team.leader = user;
+    } else {
+      team.agents.push(user);
+    }
+
+    io.to(roomCode).emit("updateState", state);
   });
 });
 
