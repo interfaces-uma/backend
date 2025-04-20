@@ -4,31 +4,17 @@ const rooms = new Map<string, GameState>();
 
 export const createRoom = (code: string, user: User): GameState => {
   const initialState: GameState = {
+    mode: "online",
     code,
-    user: {
-      id: "",
-      name: "",
-      color: null,
-      role: null,
-    },
+    user: user,
     players: [user],
     teams: {
       blue: {
-        leader: {
-          id: "",
-          name: "",
-          color: "blue",
-          role: "leader",
-        },
+        leader: null,
         agents: [],
       },
       red: {
-        leader: {
-          id: "",
-          name: "",
-          color: "red",
-          role: "leader",
-        },
+        leader: null,
         agents: [],
       },
     },
