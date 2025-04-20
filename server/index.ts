@@ -3,15 +3,32 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "node:http";
 import cors from "cors";
+import { exec } from "child_process";
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./rooms/manager";
 import { join } from "node:path";
 
-const port = 3002;
+const port = 3001;
 
 const app = express();
 app.use(cors());
 
 const server = http.createServer(app);
+
+app.post("/webhook", (req, res) => {
+  exec(
+    "git pull origin main && pm2 restart codigo",
+    (error, stdout, stderr) => {
+      if (error) {
+        console.log("Error al desplegar", error);
+      }
+      if (stderr) {
+        console.error("stderr:", stderr);
+      }
+      console.log("stdout: ", stdout);
+      res.status(200).send("hook recieved");
+    },
+  );
+});
 
 const io = new Server(server, {
   cors: {
