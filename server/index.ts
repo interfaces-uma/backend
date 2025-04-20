@@ -3,7 +3,8 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "node:http";
 import cors from "cors";
-import { createRoom, getRoom } from "./rooms/manager";
+import { createRoom, getRoom, joinRoom } from "./rooms/manager";
+import { join } from "node:path";
 
 const port = 3001;
 
@@ -28,12 +29,12 @@ createRoom("1234", {
 
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
-  socket.on("sendMessage", (data) => {
-    const state = getRoom("1234");
+  socket.on("sendMessage", (data, roomCode) => {
+    const state = getRoom(roomCode);
     console.log(state);
     state?.messages.push(data);
     console.log(state);
-    io.emit("updateState", state);
+    io.to(roomCode).emit("updateState", state);
   });
 
   socket.on("createRoom", (user, callback) => {
@@ -48,6 +49,21 @@ io.on("connection", (socket) => {
       state = createRoom(code.toString(), user);
       socket.join(code.toString());
       io.to(code.toString()).emit("updateState", state);
+      callback({ success: true });
+    }
+  });
+
+  socket.on("joinRoom", (user, roomCode, callback) => {
+    const state = getRoom(roomCode);
+    if (!state) {
+      callback({
+        success: false,
+        message: "El codigo de sala no existe",
+      });
+    } else {
+      joinRoom(roomCode, user);
+      socket.join(roomCode);
+      io.to(roomCode).emit("updateState", state);
       callback({ success: true });
     }
   });
