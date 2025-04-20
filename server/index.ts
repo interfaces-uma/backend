@@ -22,12 +22,16 @@ app.post("/webhook", (req, res) => {
         console.log("Error al desplegar", error);
       }
       if (stderr) {
-        console.error("stderr:", stderr);
+        console.error("stderr: ", stderr);
       }
       console.log("stdout: ", stdout);
       res.status(200).send("hook recieved");
     },
   );
+});
+
+app.get("/", (req, res) => {
+  res.send("Este es el backend de codigo secreto");
 });
 
 const io = new Server(server, {
