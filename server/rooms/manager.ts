@@ -27,7 +27,7 @@ export const createRoom = (code: string, user: User): GameState => {
     messages: [],
   };
   rooms.set(code, initialState);
-
+  console.log(Array.from(rooms.entries()));
   return initialState;
 };
 

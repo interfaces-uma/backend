@@ -35,6 +35,22 @@ io.on("connection", (socket) => {
     console.log(state);
     io.emit("updateState", state);
   });
+
+  socket.on("createRoom", (user, callback) => {
+    const code = Math.floor(Math.random() * 9000) + 1000;
+    let state = getRoom(code.toString());
+    if (state) {
+      callback({
+        success: false,
+        message: "Ha ocurrido un error, vuelva a intentarlo",
+      });
+    } else {
+      state = createRoom(code.toString(), user);
+      socket.join(code.toString());
+      io.to(code.toString()).emit("updateState", state);
+      callback({ success: true });
+    }
+  });
 });
 
 server.listen(port, () => {
