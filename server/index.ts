@@ -3,10 +3,10 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "node:http";
 import cors from "cors";
-import { createRoom, getRoom, joinRoom } from "./rooms/manager";
+import { createRoom, getRoom, joinRoom, leaveRoom } from "./rooms/manager";
 import { join } from "node:path";
 
-const port = 3001;
+const port = 3002;
 
 const app = express();
 app.use(cors());
@@ -65,6 +65,16 @@ io.on("connection", (socket) => {
       socket.join(roomCode);
       io.to(roomCode).emit("updateState", state);
       callback({ success: true });
+    }
+  });
+
+  socket.on("leaveRoom", (user, roomCode) => {
+    const state = getRoom(roomCode);
+    if (state) {
+      leaveRoom(roomCode, user);
+      socket.leave(roomCode);
+
+      io.to(roomCode).emit("updateState", state);
     }
   });
 });

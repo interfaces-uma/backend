@@ -40,6 +40,19 @@ export const joinRoom = (code: string, user: User): GameState | null => {
   return room;
 };
 
+export const leaveRoom = (code: string, user: User): GameState | null => {
+  const room = rooms.get(code);
+  if (!room) return null;
+  room.players = room.players.filter((p) => p.id !== user.id);
+
+  if (room.players.length === 0) {
+    //Si somos el ultimo en salir, eliminamos la sala
+    rooms.delete(code);
+  }
+
+  return room;
+};
+
 export const getRoom = (code: string): GameState | null => {
   const room = rooms.get(code);
   if (!room) return null;
