@@ -14,7 +14,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Cambiar por url del cliente
+    origin: "*", // Cambiar por url del cliente
     methods: ["GET", "POST"],
   },
 });
