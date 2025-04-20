@@ -31,7 +31,7 @@ app.post("/webhook", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Este es el backend de codigo secreto");
+  res.send("Este es el backend de codigo secreto!");
 });
 
 const io = new Server(server, {
