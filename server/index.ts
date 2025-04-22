@@ -7,7 +7,7 @@ import { exec } from "child_process";
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./rooms/manager";
 import { join } from "node:path";
 
-const port = 3002;
+const port = 3001;
 
 const app = express();
 app.use(cors());
