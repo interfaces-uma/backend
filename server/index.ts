@@ -25,9 +25,9 @@ app.post("/webhook", (req, res) => {
         console.error("stderr: ", stderr);
       }
       console.log("stdout: ", stdout);
-      res.status(200).send("hook recieved");
     }
   );
+  res.status(200).send("hook recieved");
 });
 
 app.get("/", (req, res) => {
