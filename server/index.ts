@@ -33,8 +33,7 @@ app.post("/webhook", (req, res) => {
 app.get("/", (req, res) => {
   res.send("Este es el backend de codigo secreto!!!");
 });
-app.get("/users", (req, res) => {Server.getEventListeners.name
-});
+app.get("/users", (req, res) => {res.send("Usuarios")});
 
 const io = new Server(server, {
   cors: {
