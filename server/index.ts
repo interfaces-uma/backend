@@ -7,7 +7,7 @@ import { exec } from "child_process";
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./rooms/manager";
 import { join } from "node:path";
 
-const port = 3001;
+const port = 3002;
 
 const app = express();
 app.use(cors());
@@ -33,6 +33,8 @@ app.post("/webhook", (req, res) => {
 app.get("/", (req, res) => {
   res.send("Este es el backend de codigo secreto!!!");
 });
+app.get("/users", (req, res) => {Server.getEventListeners.name
+});
 
 const io = new Server(server, {
   cors: {
@@ -52,7 +54,6 @@ io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
   socket.on("sendMessage", (data, roomCode) => {
     const state = getRoom(roomCode);
-    console.log(state);
     state?.messages.push(data);
     console.log(state);
     io.to(roomCode).emit("updateState", state);
@@ -60,16 +61,16 @@ io.on("connection", (socket) => {
 
   socket.on("createRoom", (user, callback) => {
     const code = Math.floor(Math.random() * 9000) + 1000;
-    let state = getRoom(code.toString());
-    if (state) {
+    let state = getRoom(code.toString());//la sala
+    if (state) {//si la sala ya existe, no se puede crear
       callback({
         success: false,
         message: "Ha ocurrido un error, vuelva a intentarlo",
       });
-    } else {
-      state = createRoom(code.toString(), user);
-      socket.join(code.toString());
-      io.to(code.toString()).emit("updateState", state);
+    } else {//si no existe, la creamos
+      state = createRoom(code.toString(), user);//creamos la sala
+      socket.join(code.toString()); //para que el socket este asociado a la sala y cuando se emita un evento, solo se emita a los que esten en esa sala
+      io.to(code.toString()).emit("updateState", state);//io es todo, code la sala que quiero y emit de la funcion updateState con el estado de la sala
       callback({ success: true });
     }
   });
