@@ -37,6 +37,10 @@ app.get("/users", (req, res) => {
   res.send("Usuarios");
 });
 
+app.get("/room/:id", (req, res) => {
+  res.send(getRoom(req.params.id));
+});
+
 const io = new Server(server, {
   cors: {
     origin: "*", // Cambiar por url del cliente
