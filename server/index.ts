@@ -6,6 +6,7 @@ import { join } from "node:path";
 import cors from "cors";
 import { Server } from "socket.io";
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./rooms/manager";
+import { Role, TeamColor, User } from "./types.ts";
 
 const port = 3001;
 
@@ -107,28 +108,35 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("joinTeam", ({ user, color, role }, roomCode) => {
-    const state = getRoom(roomCode);
-    if (!state) return;
+  socket.on(
+    "joinTeam",
+    (
+      { user, color, role }: { user: User; color: TeamColor; role: Role },
+      roomCode,
+    ) => {
+      const state = getRoom(roomCode);
+      if (!state) return;
+      user.color = color;
+      user.role = role;
+      const team = state.teams[color as "red" | "blue"];
 
-    const team = state.teams[color as "red" | "blue"];
-
-    for (const teamColor of ["red", "blue"]) {
-      const t = state.teams[teamColor as "red" | "blue"];
-      if (t.leader?.id === user.id) {
-        t.leader = null;
+      for (const teamColor of ["red", "blue"]) {
+        const t = state.teams[teamColor as "red" | "blue"];
+        if (t.leader?.id === user.id) {
+          t.leader = null;
+        }
+        t.agents = t.agents.filter((agent) => agent.id !== user.id);
       }
-      t.agents = t.agents.filter((agent) => agent.id !== user.id);
-    }
 
-    if (role === "leader") {
-      team.leader = user;
-    } else {
-      team.agents.push(user);
-    }
+      if (role === "leader") {
+        team.leader = user;
+      } else {
+        team.agents.push(user);
+      }
 
-    io.to(roomCode).emit("updateState", state);
-  });
+      io.to(roomCode).emit("updateState", state);
+    },
+  );
 });
 
 server.listen(port, () => {
