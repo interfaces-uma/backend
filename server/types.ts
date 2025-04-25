@@ -1,12 +1,18 @@
 export type CardColor = "red" | "blue" | "black" | "empty";
 export type Role = "leader" | "agent" | "spectator";
-export type TeamColor = "red" | "blue" | null;
+export type TeamColor = "red" | "blue";
 export type GameMode = "online" | "tutorial";
 
-export type Message = {
-  team: string;
-  user: string;
-  message: string;
+export type Clue = {
+  word: string;
+  count: number;
+} | null;
+
+type minimapCell = {
+  color: "red" | "blue" | "black" | "empty";
+};
+export type minimap = {
+  minimap: minimapCell[][];
 };
 
 export type Teams = {
@@ -18,6 +24,12 @@ export type Teams = {
     leader: User | null;
     agents: User[];
   };
+};
+
+export type Message = {
+  team: string;
+  user: string;
+  message: string;
 };
 
 export type Card = {
@@ -35,7 +47,7 @@ export type Board = {
 export type User = {
   id: string;
   name: string;
-  color: TeamColor;
+  color: TeamColor | null;
   role: Role | null;
 };
 
@@ -50,9 +62,31 @@ export type GameState = {
     team: TeamColor;
     role: Role;
   };
-  clue: {
-    word: string;
-    count: number;
-  } | null;
+  clue: Clue;
   messages: Message[];
 };
+
+export interface ClientToServerEvents {
+  joinRoom: (
+    user: User,
+    code: string,
+    callback: (response: { success: boolean; message?: string }) => void,
+  ) => void;
+  createRoom: (
+    user: User,
+    callback: (response: { success: boolean; message?: string }) => void,
+  ) => void;
+  leaveRoom: (user: User, code: string) => void;
+  joinTeam: (
+    data: { user: User; color: TeamColor; role: Role },
+    code: string,
+  ) => void;
+  sendMessage: (message: Message, roomCode: string) => void;
+  startGame: () => void;
+  sendClue: (clue: Clue) => void;
+  guessCard: (card: Card) => void;
+}
+
+export interface ServerToClientEvents {
+  updateState: (state: GameState) => void;
+}
