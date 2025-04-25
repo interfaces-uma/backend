@@ -5,7 +5,7 @@ import http from "node:http";
 import { join } from "node:path";
 import cors from "cors";
 import { Server } from "socket.io";
-import { createRoom, getRoom, joinRoom, leaveRoom } from "./manager";
+import { createRoom, getRoom, joinRoom, leaveRoom } from "./roomManager";
 import type { Role, TeamColor, User } from "./types";
 
 const port = 3001;
