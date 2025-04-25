@@ -1,5 +1,6 @@
 import { getRoom } from "./roomManager";
 import type { Card, Clue, GameState } from "./types";
+import { generateCards } from "./words";
 
 /**
  * Game Manager Module
@@ -23,7 +24,7 @@ export const gameManager = () => {
    * Llama a generateBoard para generar el tablero inicial.
    * @param roomCode - Código de la sala
    */
-  const startGame = (roomCode: string) => { };
+  const startGame = (roomCode: string) => {};
 
   /**
    * Modifica el estado del juego para seleccionar una carta.
@@ -32,21 +33,28 @@ export const gameManager = () => {
    * @param roomCode - Código de la sala
    * @param card - Carta seleccionada
    */
-  const selectCard = (roomCode: string, card: Card) => { };
+  const selectCard = (roomCode: string, card: Card) => {};
 
   /**
    * Modifica el estado del juego para finalizar la partida.
    * Manda un evento updateState al frontend
    * @param roomCode - Código de la sala
    */
-  const endGame = (roomCode: string) => { };
+  const endGame = (roomCode: string) => {};
 
   /**
    * Modifica el estado del juego para generar un nuevo tablero.
    * Manda un evento updateState al frontend
    * @param roomCode - Código de la sala
    */
-  const generateBoard = (roomCode: string) => { };
+  const generateBoard = (state: GameState) => {
+    const { board, teamColor } = generateCards();
+    state.cards = board;
+    state.turn = {
+      team: teamColor,
+      role: "leader",
+    };
+  };
 
   /**
    * Modifica el estado del juego para establecer una pista.
@@ -54,14 +62,14 @@ export const gameManager = () => {
    * @param roomCode - Código de la sala
    * @param clue - Pista
    */
-  const setClue = (roomCode: string, pista: Clue) => { };
+  const setClue = (roomCode: string, pista: Clue) => {};
 
   /**
    * Modifica el estado del juego para cambiar el turno.
    * Manda un evento updateState al frontend
    * @param roomCode - Código de la sala
    */
-  const changeTurn = (roomCode: string) => { };
+  const changeTurn = (roomCode: string) => {};
 
   /**
    * Modifica el estado del juego para reiniciar la partida.
@@ -69,7 +77,7 @@ export const gameManager = () => {
    * Manda un evento updateState al frontend
    * @param roomCode - Código de la sala
    */
-  const resetGame = (roomCode: string) => { };
+  const resetGame = (roomCode: string) => {};
 
   /**
    * Devuelve el estado del juego.

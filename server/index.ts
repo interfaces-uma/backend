@@ -1,7 +1,7 @@
 import express from "express";
 
 import { exec } from "node:child_process";
-import http from "node:http";
+import http, { get } from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { createRoom, getRoom } from "./roomManager";
@@ -21,7 +21,7 @@ export const io = new Server<ClientToServerEvents, ServerToClientEvents>(
       origin: "*", // Cambiar por url del cliente
       methods: ["GET", "POST"],
     },
-  },
+  }
 );
 
 app.get("/", (req, res) => {
@@ -46,7 +46,7 @@ app.post("/webhook", (req, res) => {
         console.error("stderr: ", stderr);
       }
       console.log("stdout: ", stdout);
-    },
+    }
   );
   res.status(200).send("hook recieved");
 });

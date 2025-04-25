@@ -1,6 +1,9 @@
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./roomManager";
 import type { Role, TeamColor, User } from "./types";
 import { io, server, port } from "./index";
+import { gameManager } from "./gameManager";
+
+const game = gameManager();
 
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
@@ -50,7 +53,6 @@ io.on("connection", (socket) => {
     if (state) {
       leaveRoom(roomCode, user);
       socket.leave(roomCode);
-
       io.to(roomCode).emit("updateState", state);
     }
   });
@@ -59,7 +61,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode,
+      roomCode
     ) => {
       const state = getRoom(roomCode);
       if (!state) return;
@@ -75,6 +77,8 @@ io.on("connection", (socket) => {
         t.agents = t.agents.filter((agent) => agent.id !== user.id);
       }
 
+      state.players = state.players.filter((player) => player.id !== user.id);
+
       if (role === "leader") {
         team.leader = user;
       } else {
@@ -82,8 +86,25 @@ io.on("connection", (socket) => {
       }
 
       io.to(roomCode).emit("updateState", state);
-    },
+    }
   );
+
+  socket.on("startGame", (roomCode, callback) => {
+    const state = getRoom(roomCode);
+    if (!state) return;
+
+    if (state.players.length > 0) {
+      callback({
+        success: false,
+        message: "Todos los jugadores deben unirse a un equipo",
+      });
+      return;
+    }
+    game.generateBoard(state); // Genera el tablero y establece el turno inicial
+
+    io.to(roomCode).emit("updateState", state);
+    io.to(roomCode).emit("redirectGame");
+  });
 });
 
 server.listen(port, () => {
