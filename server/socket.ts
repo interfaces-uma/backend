@@ -1,11 +1,3 @@
-import type { Socket } from "socket.io";
-import express from "express";
-
-import { exec } from "node:child_process";
-import http from "node:http";
-import { join } from "node:path";
-import cors from "cors";
-import { Server } from "socket.io";
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./roomManager";
 import type { Role, TeamColor, User } from "./types";
 import { io, server, port } from "./index";
@@ -14,7 +6,7 @@ io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
   socket.on("sendMessage", (data, roomCode) => {
     const state = getRoom(roomCode);
-
+    if (!state) return;
     state?.messages.push(data);
     console.log(state);
     io.to(roomCode).emit("updateState", state);
@@ -67,13 +59,13 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode
+      roomCode,
     ) => {
       const state = getRoom(roomCode);
       if (!state) return;
       user.color = color;
       user.role = role;
-      const team = state.teams[color as "red" | "blue"];
+      const team = state.teams[color];
 
       for (const teamColor of ["red", "blue"]) {
         const t = state.teams[teamColor as "red" | "blue"];
@@ -90,7 +82,7 @@ io.on("connection", (socket) => {
       }
 
       io.to(roomCode).emit("updateState", state);
-    }
+    },
   );
 });
 
