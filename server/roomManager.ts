@@ -1,4 +1,4 @@
-import type { GameState, User } from "../types";
+import type { GameState, User } from "./types";
 
 const rooms = new Map<string, GameState>();
 
