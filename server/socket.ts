@@ -8,97 +8,92 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./roomManager";
 import type { Role, TeamColor, User } from "./types";
-import { io } from "./index";
-
-
+import { io, server, port } from "./index";
 
 io.on("connection", (socket) => {
-    console.log("a user connected", socket.id);
-    socket.on("sendMessage", (data, roomCode) => {
-      const state = getRoom(roomCode);
-      state?.messages.push(data);
-      console.log(state);
-      io.to(roomCode).emit("updateState", state);
-    });
-  
-    
-    socket.on("createRoom", (user, callback) => {
-      const code = Math.floor(Math.random() * 9000) + 1000;
-      let state = getRoom(code.toString()); //la sala
-      if (state) {
-        //si la sala ya existe, no se puede crear
-        callback({
-          success: false,
-          message: "Ha ocurrido un error, vuelva a intentarlo",
-        });
-      } else {
-        //si no existe, la creamos
-        state = createRoom(code.toString(), user); //creamos la sala
-        socket.join(code.toString()); //para que el socket este asociado a la sala y cuando se emita un evento, solo se emita a los que esten en esa sala
-        io.to(code.toString()).emit("updateState", state); //io es todo, code la sala que quiero y emit de la funcion updateState con el estado de la sala
-        callback({ success: true });
-      }
-    });
-  
-  
-    
-  
-    socket.on("joinRoom", (user, roomCode, callback) => {
-      const state = getRoom(roomCode);
-      if (!state) {
-        callback({
-          success: false,
-          message: "El codigo de sala no existe",
-        });
-      } else {
-        joinRoom(roomCode, user);
-        socket.join(roomCode);
-        io.to(roomCode).emit("updateState", state);
-        callback({ success: true });
-      }
-    });
-  
-    socket.on("leaveRoom", (user, roomCode) => {
-      const state = getRoom(roomCode);
-      if (state) {
-        leaveRoom(roomCode, user);
-        socket.leave(roomCode);
-  
-        io.to(roomCode).emit("updateState", state);
-      }
-    });
-  
-    socket.on(
-      "joinTeam",
-      (
-        { user, color, role }: { user: User; color: TeamColor; role: Role },
-        roomCode,
-      ) => {
-        const state = getRoom(roomCode);
-        if (!state) return;
-        user.color = color;
-        user.role = role;
-        const team = state.teams[color as "red" | "blue"];
-  
-        for (const teamColor of ["red", "blue"]) {
-          const t = state.teams[teamColor as "red" | "blue"];
-          if (t.leader?.id === user.id) {
-            t.leader = null;
-          }
-          t.agents = t.agents.filter((agent) => agent.id !== user.id);
-        }
-  
-        if (role === "leader") {
-          team.leader = user;
-        } else {
-          team.agents.push(user);
-        }
-  
-        io.to(roomCode).emit("updateState", state);
-      },
-    );
+  console.log("a user connected", socket.id);
+  socket.on("sendMessage", (data, roomCode) => {
+    const state = getRoom(roomCode);
+
+    state?.messages.push(data);
+    console.log(state);
+    io.to(roomCode).emit("updateState", state);
   });
-  
 
+  socket.on("createRoom", (user, callback) => {
+    const code = Math.floor(Math.random() * 9000) + 1000;
+    let state = getRoom(code.toString()); //la sala
+    if (state) {
+      //si la sala ya existe, no se puede crear
+      callback({
+        success: false,
+        message: "Ha ocurrido un error, vuelva a intentarlo",
+      });
+    } else {
+      //si no existe, la creamos
+      state = createRoom(code.toString(), user); //creamos la sala
+      socket.join(code.toString()); //para que el socket este asociado a la sala y cuando se emita un evento, solo se emita a los que esten en esa sala
+      io.to(code.toString()).emit("updateState", state); //io es todo, code la sala que quiero y emit de la funcion updateState con el estado de la sala
+      callback({ success: true });
+    }
+  });
 
+  socket.on("joinRoom", (user, roomCode, callback) => {
+    const state = getRoom(roomCode);
+    if (!state) {
+      callback({
+        success: false,
+        message: "El codigo de sala no existe",
+      });
+    } else {
+      joinRoom(roomCode, user);
+      socket.join(roomCode);
+      io.to(roomCode).emit("updateState", state);
+      callback({ success: true });
+    }
+  });
 
+  socket.on("leaveRoom", (user, roomCode) => {
+    const state = getRoom(roomCode);
+    if (state) {
+      leaveRoom(roomCode, user);
+      socket.leave(roomCode);
+
+      io.to(roomCode).emit("updateState", state);
+    }
+  });
+
+  socket.on(
+    "joinTeam",
+    (
+      { user, color, role }: { user: User; color: TeamColor; role: Role },
+      roomCode
+    ) => {
+      const state = getRoom(roomCode);
+      if (!state) return;
+      user.color = color;
+      user.role = role;
+      const team = state.teams[color as "red" | "blue"];
+
+      for (const teamColor of ["red", "blue"]) {
+        const t = state.teams[teamColor as "red" | "blue"];
+        if (t.leader?.id === user.id) {
+          t.leader = null;
+        }
+        t.agents = t.agents.filter((agent) => agent.id !== user.id);
+      }
+
+      if (role === "leader") {
+        team.leader = user;
+      } else {
+        team.agents.push(user);
+      }
+
+      io.to(roomCode).emit("updateState", state);
+    }
+  );
+});
+
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
