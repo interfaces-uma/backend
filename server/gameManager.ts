@@ -3,7 +3,7 @@ import type { Card, Clue, GameState, User } from "./types";
 import { generateCards } from "./words";
 
 // Metodos a usar del roomManager
-const { createRoom, getRoom } = roomManager();
+const { getRoom } = roomManager();
 
 /**
  * Game Manager Interface

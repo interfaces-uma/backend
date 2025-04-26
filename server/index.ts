@@ -1,7 +1,7 @@
 import express from "express";
 
 import { exec } from "node:child_process";
-import http, { get } from "node:http";
+import http from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { roomManager } from "./roomManager";
