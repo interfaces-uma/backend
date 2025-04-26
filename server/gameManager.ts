@@ -1,5 +1,5 @@
 import { getRoom } from "./roomManager";
-import type { Card, Clue, GameState } from "./types";
+import type { Card, Clue, GameState, User } from "./types";
 import { generateCards } from "./words";
 
 /**
@@ -107,6 +107,19 @@ export const gameManager = () => {
     return state;
   };
 
+  const leaveTeam = (state: GameState, user: User) => {
+    if (user.color === null || user.role === "spectator") return;
+
+    if (user.role === "leader") {
+      state.teams[user.color].leader = null;
+    } else {
+      state.teams[user.color].agents = state.teams[user.color].agents.filter(
+        (agent) => agent.id !== user.id
+      );
+    }
+    state.players.push(user);
+  };
+
   return {
     startGame,
     selectCard,
@@ -116,5 +129,6 @@ export const gameManager = () => {
     changeTurn,
     resetGame,
     getGameState,
+    leaveTeam,
   };
 };

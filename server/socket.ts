@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode,
+      roomCode
     ) => {
       const state = getRoom(roomCode);
       if (!state) return;
@@ -89,8 +89,16 @@ io.on("connection", (socket) => {
       }
 
       io.to(roomCode).emit("updateState", state);
-    },
+    }
   );
+
+  socket.on("leaveTeam", (code, user) => {
+    const state = getRoom(code);
+    if (!state) return;
+    game.leaveTeam(state, user);
+
+    io.to(code).emit("updateState", state);
+  });
 
   socket.on("startGame", (roomCode, callback) => {
     const state = getRoom(roomCode);
