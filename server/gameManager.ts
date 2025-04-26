@@ -1,6 +1,26 @@
-import { getRoom } from "./roomManager";
+import { roomManager } from "./roomManager";
 import type { Card, Clue, GameState, User } from "./types";
 import { generateCards } from "./words";
+
+// Metodos a usar del roomManager
+const { createRoom, getRoom } = roomManager();
+
+/**
+ * Game Manager Interface
+ * Interfaz que define las funciones del Game Manager.
+ * @interface GameManager
+ */
+export interface GameManager {
+  startGame: (state: GameState) => void;
+  selectCard: (state: GameState, card: Card) => void;
+  endGame: (state: GameState) => void;
+  generateBoard: (state: GameState) => void;
+  setClue: (state: GameState, clue: Clue) => void;
+  changeTurn: (state: GameState) => void;
+  resetGame: (state: GameState) => void;
+  getGameState: (roomCode: string) => GameState | null;
+  leaveTeam: (state: GameState, user: User) => void;
+}
 
 /**
  * Game Manager Module
@@ -18,7 +38,7 @@ import { generateCards } from "./words";
  * game.getGameState("1234");
  *
  */
-export const gameManager = () => {
+export const gameManager = (): GameManager => {
   /**
    * Modifica el estado del juego para iniciar la partida.
    * Llama a generateBoard para generar el tablero inicial.
@@ -114,7 +134,7 @@ export const gameManager = () => {
       state.teams[user.color].leader = null;
     } else {
       state.teams[user.color].agents = state.teams[user.color].agents.filter(
-        (agent) => agent.id !== user.id
+        (agent) => agent.id !== user.id,
       );
     }
     state.players.push(user);
