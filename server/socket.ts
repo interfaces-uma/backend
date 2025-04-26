@@ -1,5 +1,5 @@
 import { createRoom, getRoom, joinRoom, leaveRoom } from "./roomManager";
-import type { Role, TeamColor, User } from "./types";
+import type { Card, Role, TeamColor, User } from "./types";
 import { io, server, port } from "./index";
 import { gameManager } from "./gameManager";
 
@@ -28,6 +28,7 @@ io.on("connection", (socket) => {
       //si no existe, la creamos
       state = createRoom(code.toString(), user); //creamos la sala
       socket.join(code.toString()); //para que el socket este asociado a la sala y cuando se emita un evento, solo se emita a los que esten en esa sala
+      socket.data.roomCode = code.toString(); //guardamos el codigo de la sala en el socket
       io.to(code.toString()).emit("updateState", state); //io es todo, code la sala que quiero y emit de la funcion updateState con el estado de la sala
       callback({ success: true });
     }
@@ -43,6 +44,7 @@ io.on("connection", (socket) => {
     } else {
       joinRoom(roomCode, user);
       socket.join(roomCode);
+      socket.data.roomCode = roomCode;
       io.to(roomCode).emit("updateState", state);
       callback({ success: true });
     }
@@ -53,6 +55,7 @@ io.on("connection", (socket) => {
     if (state) {
       leaveRoom(roomCode, user);
       socket.leave(roomCode);
+      socket.data.roomCode = null;
       io.to(roomCode).emit("updateState", state);
     }
   });
@@ -61,7 +64,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode
+      roomCode,
     ) => {
       const state = getRoom(roomCode);
       if (!state) return;
@@ -86,7 +89,7 @@ io.on("connection", (socket) => {
       }
 
       io.to(roomCode).emit("updateState", state);
-    }
+    },
   );
 
   socket.on("startGame", (roomCode, callback) => {
@@ -100,10 +103,21 @@ io.on("connection", (socket) => {
       });
       return;
     }
-    game.generateBoard(state); // Genera el tablero y establece el turno inicial
+    game.startGame(state); // Genera el tablero y establece el turno inicial
 
     io.to(roomCode).emit("updateState", state);
     io.to(roomCode).emit("redirectGame");
+  });
+
+  socket.on("guessCard", (card: Card) => {
+    const roomCode = socket.data.roomCode;
+    const state = getRoom(roomCode);
+    if (!state) return;
+
+    game.selectCard(state, card);
+    console.log(roomCode, "aaaaaaa");
+
+    io.to(roomCode).emit("updateState", state);
   });
 });
 
