@@ -1,23 +1,25 @@
-import { createRoom, getRoom, joinRoom, leaveRoom } from "./roomManager";
+import { roomManager } from "./roomManager";
 import type { Card, Role, TeamColor, User } from "./types";
 import { io, server, port } from "./index";
 import { gameManager } from "./gameManager";
+import { logger } from "./utils";
 
 const game = gameManager();
+const rooms = roomManager();
 
 io.on("connection", (socket) => {
-  console.log("a user connected", socket.id);
+  logger.debug(`El usuario ${socket.id} se ha conectado`, "Socket");
   socket.on("sendMessage", (data, roomCode) => {
-    const state = getRoom(roomCode);
+    const state = rooms.getRoom(roomCode);
     if (!state) return;
     state?.messages.push(data);
-    console.log(state);
+    logger.debug(`El usuario ${data.user} ha enviado un mensaje`, "Socket");
     io.to(roomCode).emit("updateState", state);
   });
 
   socket.on("createRoom", (user, callback) => {
     const code = Math.floor(Math.random() * 9000) + 1000;
-    let state = getRoom(code.toString()); //la sala
+    let state = rooms.getRoom(code.toString()); //la sala
     if (state) {
       //si la sala ya existe, no se puede crear
       callback({
@@ -26,7 +28,7 @@ io.on("connection", (socket) => {
       });
     } else {
       //si no existe, la creamos
-      state = createRoom(code.toString(), user); //creamos la sala
+      state = rooms.createRoom(code.toString(), user); //creamos la sala
       socket.join(code.toString()); //para que el socket este asociado a la sala y cuando se emita un evento, solo se emita a los que esten en esa sala
       socket.data.roomCode = code.toString(); //guardamos el codigo de la sala en el socket
       io.to(code.toString()).emit("updateState", state); //io es todo, code la sala que quiero y emit de la funcion updateState con el estado de la sala
@@ -35,14 +37,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("joinRoom", (user, roomCode, callback) => {
-    const state = getRoom(roomCode);
+    const state = rooms.getRoom(roomCode);
     if (!state) {
       callback({
         success: false,
         message: "El codigo de sala no existe",
       });
     } else {
-      joinRoom(roomCode, user);
+      rooms.joinRoom(roomCode, user);
       socket.join(roomCode);
       socket.data.roomCode = roomCode;
       io.to(roomCode).emit("updateState", state);
@@ -51,9 +53,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", (user, roomCode) => {
-    const state = getRoom(roomCode);
+    const state = rooms.getRoom(roomCode);
     if (state) {
-      leaveRoom(roomCode, user);
+      rooms.leaveRoom(roomCode, user);
       socket.leave(roomCode);
       socket.data.roomCode = null;
       io.to(roomCode).emit("updateState", state);
@@ -64,9 +66,9 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode
+      roomCode,
     ) => {
-      const state = getRoom(roomCode);
+      const state = rooms.getRoom(roomCode);
       if (!state) return;
       user.color = color;
       user.role = role;
@@ -89,11 +91,11 @@ io.on("connection", (socket) => {
       }
 
       io.to(roomCode).emit("updateState", state);
-    }
+    },
   );
 
   socket.on("leaveTeam", (code, user) => {
-    const state = getRoom(code);
+    const state = rooms.getRoom(code);
     if (!state) return;
     game.leaveTeam(state, user);
 
@@ -101,7 +103,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("startGame", (roomCode, callback) => {
-    const state = getRoom(roomCode);
+    const state = rooms.getRoom(roomCode);
     if (!state) return;
 
     if (state.players.length > 0) {
@@ -119,16 +121,15 @@ io.on("connection", (socket) => {
 
   socket.on("guessCard", (card: Card) => {
     const roomCode = socket.data.roomCode;
-    const state = getRoom(roomCode);
+    const state = rooms.getRoom(roomCode);
     if (!state) return;
 
     game.selectCard(state, card);
-    console.log(roomCode, "aaaaaaa");
 
     io.to(roomCode).emit("updateState", state);
   });
 });
 
 server.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  logger.info(`Server is running on port ${port}`, "Socket");
 });

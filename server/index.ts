@@ -4,16 +4,21 @@ import { exec } from "node:child_process";
 import http, { get } from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
-import { createRoom, getRoom } from "./roomManager";
+import { roomManager } from "./roomManager";
 import type { ClientToServerEvents, ServerToClientEvents } from "./types";
+import { logger } from "./utils";
 
 export const port = 3001;
-
+const rooms = roomManager();
 const app = express();
 app.use(cors());
 
 export const server = http.createServer(app);
 
+/** Variable que expone el modulo de socket.io
+ * Esta variable expone el modulo de socket.io para poder usarlo en otros modulos.
+ * Permite la comunicacion entre el servidor y el cliente.
+ */
 export const io = new Server<ClientToServerEvents, ServerToClientEvents>(
   server,
   {
@@ -21,7 +26,7 @@ export const io = new Server<ClientToServerEvents, ServerToClientEvents>(
       origin: "*", // Cambiar por url del cliente
       methods: ["GET", "POST"],
     },
-  }
+  },
 );
 
 app.get("/", (req, res) => {
@@ -32,7 +37,7 @@ app.get("/users", (req, res) => {
 });
 
 app.get("/room/:id", (req, res) => {
-  res.send(getRoom(req.params.id));
+  res.send(rooms.getRoom(req.params.id));
 });
 
 app.post("/webhook", (req, res) => {
@@ -40,18 +45,18 @@ app.post("/webhook", (req, res) => {
     "git pull origin main && pm2 restart codigo",
     (error, stdout, stderr) => {
       if (error) {
-        console.log("Error al desplegar", error);
+        logger.error("Errror al desplegar", "Webhook");
       }
       if (stderr) {
-        console.error("stderr: ", stderr);
+        logger.error(`Error: ${stderr}`, "Webhook");
       }
-      console.log("stdout: ", stdout);
-    }
+      logger.debug(stdout, "Webhook");
+    },
   );
   res.status(200).send("hook recieved");
 });
 
-createRoom("1234", {
+rooms.createRoom("1234", {
   name: "miguel",
   color: "red",
   id: "miguel1234",
