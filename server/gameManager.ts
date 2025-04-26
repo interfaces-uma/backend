@@ -22,30 +22,37 @@ export const gameManager = () => {
   /**
    * Modifica el estado del juego para iniciar la partida.
    * Llama a generateBoard para generar el tablero inicial.
-   * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    */
-  const startGame = (roomCode: string) => {};
+  const startGame = (state: GameState) => {
+    generateBoard(state);
+  };
 
   /**
    * Modifica el estado del juego para seleccionar una carta.
    * Comprueba y ejecuta endGame si se ha llegado a la condición de victoria.
    *
-   * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    * @param card - Carta seleccionada
    */
-  const selectCard = (roomCode: string, card: Card) => {};
+  const selectCard = (state: GameState, card: Card) => {
+    state.cards.map((c) => {
+      if (c.word === card.word) {
+        c.isFlipped = !c.isFlipped;
+      }
+      return c;
+    });
+  };
 
   /**
    * Modifica el estado del juego para finalizar la partida.
-   * Manda un evento updateState al frontend
-   * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    */
-  const endGame = (roomCode: string) => {};
+  const endGame = (state: GameState) => {};
 
   /**
    * Modifica el estado del juego para generar un nuevo tablero.
-   * Manda un evento updateState al frontend
-   * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    */
   const generateBoard = (state: GameState) => {
     const { board, teamColor } = generateCards();
@@ -58,26 +65,37 @@ export const gameManager = () => {
 
   /**
    * Modifica el estado del juego para establecer una pista.
-   * Manda un evento updateState al frontend
-   * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    * @param clue - Pista
    */
-  const setClue = (roomCode: string, pista: Clue) => {};
+  const setClue = (state: GameState, pista: Clue) => {
+    state.clue = pista;
+  };
 
   /**
    * Modifica el estado del juego para cambiar el turno.
-   * Manda un evento updateState al frontend
-   * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    */
-  const changeTurn = (roomCode: string) => {};
+  const changeTurn = (state: GameState) => {
+    if (state.turn.role === "leader") {
+      state.turn.role = "agent";
+    } else {
+      state.turn.role = "leader";
+      state.turn.team = state.turn.team === "red" ? "blue" : "red";
+    }
+  };
 
   /**
    * Modifica el estado del juego para reiniciar la partida.
    * Genera un nuevo tablero y establece el turno inicial.
-   * Manda un evento updateState al frontend
    * @param roomCode - Código de la sala
+   * @param state - Estado de la partida a actualizar
    */
-  const resetGame = (roomCode: string) => {};
+  const resetGame = (state: GameState) => {
+    state.cards = [];
+    state.clue = null;
+    generateBoard(state);
+  };
 
   /**
    * Devuelve el estado del juego.
@@ -85,7 +103,8 @@ export const gameManager = () => {
    * @returns El estado del juego o null si no existe
    */
   const getGameState = (roomCode: string): GameState | null => {
-    return getRoom(roomCode);
+    const state = getRoom(roomCode);
+    return state;
   };
 
   return {
