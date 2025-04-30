@@ -107,12 +107,17 @@ export const roomManager = (): RoomManager => {
       "RoomManager",
     );
 
-    if (room.players.length === 0) {
-      //Si somos el ultimo en salir, eliminamos la sala
-      logger.debug(`Se ha cerrado la sala ${code}`, "RoomManager");
+    const hasPlayers =
+    room.players.length > 0 ||
+    room.teams.red.leader !== null ||
+    room.teams.red.agents.length > 0 ||
+    room.teams.blue.leader !== null ||
+    room.teams.blue.agents.length > 0;
 
-      rooms.delete(code);
-    }
+  if (!hasPlayers) {
+    logger.debug(`Se ha cerrado la sala ${code}`, "RoomManager");
+    rooms.delete(code);
+  }
 
     return room;
   };
