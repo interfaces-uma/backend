@@ -58,7 +58,7 @@ export const gameManager = (): GameManager => {
   const revealCard = (state: GameState, card: Card) => {
     state.cards.map((c) => {
       if (c.word === card.word) {
-        c.isFlipped = !c.isFlipped;
+        c.isFlipped = true;
       }
       return c;
     });
@@ -90,6 +90,7 @@ export const gameManager = (): GameManager => {
    */
   const setClue = (state: GameState, pista: Clue) => {
     state.clue = pista;
+    state.teams[state.turn.team].clueList.push(pista);
   };
 
   /**

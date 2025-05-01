@@ -44,10 +44,12 @@ export const roomManager = (): RoomManager => {
         blue: {
           leader: null,
           agents: [],
+          clueList: [],
         },
         red: {
           leader: null,
           agents: [],
+          clueList: [],
         },
       },
       cards: [],
@@ -79,7 +81,7 @@ export const roomManager = (): RoomManager => {
 
     logger.debug(
       `El usuario ${user.name} se unió a la sala ${code}`,
-      "RoomManager",
+      "RoomManager"
     );
     return room;
   };
@@ -104,20 +106,20 @@ export const roomManager = (): RoomManager => {
     }
     logger.debug(
       `El usuario ${user.name} salió de la sala ${code}`,
-      "RoomManager",
+      "RoomManager"
     );
 
     const hasPlayers =
-    room.players.length > 0 ||
-    room.teams.red.leader !== null ||
-    room.teams.red.agents.length > 0 ||
-    room.teams.blue.leader !== null ||
-    room.teams.blue.agents.length > 0;
+      room.players.length > 0 ||
+      room.teams.red.leader !== null ||
+      room.teams.red.agents.length > 0 ||
+      room.teams.blue.leader !== null ||
+      room.teams.blue.agents.length > 0;
 
-  if (!hasPlayers) {
-    logger.debug(`Se ha cerrado la sala ${code}`, "RoomManager");
-    rooms.delete(code);
-  }
+    if (!hasPlayers) {
+      logger.debug(`Se ha cerrado la sala ${code}`, "RoomManager");
+      rooms.delete(code);
+    }
 
     return room;
   };

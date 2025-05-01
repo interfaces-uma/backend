@@ -19,10 +19,12 @@ export type Teams = {
   blue: {
     leader: User | null;
     agents: User[];
+    clueList: Clue[];
   };
   red: {
     leader: User | null;
     agents: User[];
+    clueList: Clue[];
   };
 };
 
