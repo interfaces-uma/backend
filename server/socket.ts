@@ -113,6 +113,28 @@ io.on("connection", (socket) => {
       });
       return;
     }
+
+    /*
+    if (state.teams.red.leader === null || state.teams.blue.leader === null) {
+      callback({
+        success: false,
+        message: "Ambos equipos deben tener un capitan",
+      });
+      return;
+    }
+
+    if (
+      state.teams.red.agents.length < 1 ||
+      state.teams.blue.agents.length < 1
+    ) {
+      callback({
+        success: false,
+        message: "Ambos equipos deben tener al menos un agente",
+      });
+      return;
+    }
+      */
+
     game.startGame(state); // Genera el tablero y establece el turno inicial
 
     io.to(roomCode).emit("updateState", state);
