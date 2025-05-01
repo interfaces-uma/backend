@@ -12,7 +12,7 @@ const { getRoom } = roomManager();
  */
 export interface GameManager {
   startGame: (state: GameState) => void;
-  selectCard: (state: GameState, card: Card) => void;
+  revealCard: (state: GameState, card: Card) => void;
   endGame: (state: GameState) => void;
   generateBoard: (state: GameState) => void;
   setClue: (state: GameState, clue: Clue) => void;
@@ -55,7 +55,7 @@ export const gameManager = (): GameManager => {
    * @param state - Estado de la partida a actualizar
    * @param card - Carta seleccionada
    */
-  const selectCard = (state: GameState, card: Card) => {
+  const revealCard = (state: GameState, card: Card) => {
     state.cards.map((c) => {
       if (c.word === card.word) {
         c.isFlipped = !c.isFlipped;
@@ -134,7 +134,7 @@ export const gameManager = (): GameManager => {
       state.teams[user.color].leader = null;
     } else {
       state.teams[user.color].agents = state.teams[user.color].agents.filter(
-        (agent) => agent.id !== user.id,
+        (agent) => agent.id !== user.id
       );
     }
     state.players.push(user);
@@ -142,7 +142,7 @@ export const gameManager = (): GameManager => {
 
   return {
     startGame,
-    selectCard,
+    revealCard,
     endGame,
     generateBoard,
     setClue,

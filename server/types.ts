@@ -5,7 +5,7 @@ export type GameMode = "online" | "tutorial";
 
 export type Clue = {
   word: string;
-  count: number;
+  cards: Card[];
 } | null;
 
 type minimapCell = {
@@ -51,6 +51,9 @@ export type User = {
   role: Role | null;
 };
 
+/**
+ * Define el estado de una partida
+ */
 export type GameState = {
   mode: GameMode;
   code: string;

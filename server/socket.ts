@@ -1,5 +1,5 @@
 import { roomManager } from "./roomManager";
-import type { Card, Role, TeamColor, User } from "./types";
+import type { Card, Role, TeamColor, User, Clue } from "./types";
 import { io, server, port } from "./index";
 import { gameManager } from "./gameManager";
 import { logger } from "./utils";
@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode,
+      roomCode
     ) => {
       const state = rooms.getRoom(roomCode);
       if (!state) return;
@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
       }
 
       io.to(roomCode).emit("updateState", state);
-    },
+    }
   );
 
   socket.on("leaveTeam", (code, user) => {
@@ -119,12 +119,24 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("redirectGame");
   });
 
+  socket.on("sendClue", (clue: Clue) => {
+    const roomCode = socket.data.roomCode;
+    const state = rooms.getRoom(roomCode);
+    if (!state) return;
+
+    game.setClue(state, clue); // Establece la pista y el conteo de palabras
+
+    game.changeTurn(state); // Cambia el turno al siguiente jugador
+
+    io.to(roomCode).emit("updateState", state);
+  });
+
   socket.on("guessCard", (card: Card) => {
     const roomCode = socket.data.roomCode;
     const state = rooms.getRoom(roomCode);
     if (!state) return;
 
-    game.selectCard(state, card);
+    game.revealCard(state, card); // Revela la carta seleccionada
 
     io.to(roomCode).emit("updateState", state);
   });
