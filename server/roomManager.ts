@@ -83,6 +83,14 @@ export const roomManager = (): RoomManager => {
       `El usuario ${user.name} se unió a la sala ${code}`,
       "RoomManager"
     );
+
+    room.messages.push({
+      team: "",
+      user: "",
+      message: `El jugador ${user.name} se ha unido a la sala`,
+      isLog: true,
+    });
+
     return room;
   };
 
@@ -108,6 +116,13 @@ export const roomManager = (): RoomManager => {
       `El usuario ${user.name} salió de la sala ${code}`,
       "RoomManager"
     );
+
+    room.messages.push({
+      team: "",
+      user: "",
+      message: `El jugador ${user.name} salió de la sala`,
+      isLog: true,
+    });
 
     const hasPlayers =
       room.players.length > 0 ||

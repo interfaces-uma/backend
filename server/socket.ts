@@ -70,6 +70,8 @@ io.on("connection", (socket) => {
     ) => {
       const state = rooms.getRoom(roomCode);
       if (!state) return;
+      if (user.color === color) return; // Si el usuario ya pertenece al equipo, no hace nada
+
       user.color = color;
       user.role = role;
       const team = state.teams[color];
@@ -90,6 +92,13 @@ io.on("connection", (socket) => {
         team.agents.push(user);
       }
 
+      state.messages.push({
+        team: "",
+        user: "",
+        message: `El jugador ${user.name} se unió al equipo ${color}`,
+        isLog: true,
+      });
+
       io.to(roomCode).emit("updateState", state);
     }
   );
@@ -98,6 +107,13 @@ io.on("connection", (socket) => {
     const state = rooms.getRoom(code);
     if (!state) return;
     game.leaveTeam(state, user);
+
+    state.messages.push({
+      team: "",
+      user: "",
+      message: `El jugador ${user.name} abandonó el equipo ${user.color}`,
+      isLog: true,
+    });
 
     io.to(code).emit("updateState", state);
   });
