@@ -62,6 +62,15 @@ export const gameManager = (): GameManager => {
       }
       return c;
     });
+
+    if (state.clue !== null) {
+      state.clue.cards.map((c) => {
+        if (c.word === card.word) {
+          c.isFlipped = true;
+        }
+        return c;
+      });
+    }
   };
 
   /**
