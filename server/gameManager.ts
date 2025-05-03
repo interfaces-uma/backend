@@ -46,6 +46,12 @@ export const gameManager = (): GameManager => {
    */
   const startGame = (state: GameState) => {
     generateBoard(state);
+    state.messages.push({
+      team: "",
+      user: "",
+      message: `Empieza la partida! Turno del capitan del equipo ${state.turn.team}`,
+      isLog: true,
+    });
   };
 
   /**
@@ -100,6 +106,13 @@ export const gameManager = (): GameManager => {
   const setClue = (state: GameState, pista: Clue) => {
     state.clue = pista;
     state.teams[state.turn.team].clueList.push(pista);
+    if (pista === null) return;
+    state.messages.push({
+      team: "",
+      user: "",
+      message: `El capitan del equipo ${state.turn.team} ha dado la pista: \n ${pista.word} (${pista.cards.length})`,
+      isLog: true,
+    });
   };
 
   /**
@@ -109,9 +122,21 @@ export const gameManager = (): GameManager => {
   const changeTurn = (state: GameState) => {
     if (state.turn.role === "leader") {
       state.turn.role = "agent";
+      state.messages.push({
+        team: "",
+        user: "",
+        message: `Turno de los agentes del equipo ${state.turn.team}`,
+        isLog: true,
+      });
     } else {
       state.turn.role = "leader";
       state.turn.team = state.turn.team === "red" ? "blue" : "red";
+      state.messages.push({
+        team: "",
+        user: "",
+        message: `Turno del capitan del equipo ${state.turn.team}`,
+        isLog: true,
+      });
     }
   };
 
@@ -148,6 +173,12 @@ export const gameManager = (): GameManager => {
       );
     }
     state.players.push(user);
+    state.messages.push({
+      team: "",
+      user: "",
+      message: `El jugador ${user.name} abandonó el equipo ${user.color}`,
+      isLog: true,
+    });
   };
 
   return {
