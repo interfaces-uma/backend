@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode
+      roomCode,
     ) => {
       const state = rooms.getRoom(roomCode);
       if (!state) return;
@@ -100,7 +100,7 @@ io.on("connection", (socket) => {
       });
 
       io.to(roomCode).emit("updateState", state);
-    }
+    },
   );
 
   socket.on("leaveTeam", (code, user) => {
@@ -163,6 +163,16 @@ io.on("connection", (socket) => {
     if (!state) return;
 
     game.setClue(state, clue); // Establece la pista y el conteo de palabras
+
+    game.changeTurn(state); // Cambia el turno al siguiente jugador
+
+    io.to(roomCode).emit("updateState", state);
+  });
+
+  socket.on("nextTurn", () => {
+    const roomCode = socket.data.roomCode;
+    const state = rooms.getRoom(roomCode);
+    if (!state) return;
 
     game.changeTurn(state); // Cambia el turno al siguiente jugador
 
