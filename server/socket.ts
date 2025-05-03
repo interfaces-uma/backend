@@ -31,6 +31,7 @@ io.on("connection", (socket) => {
       state = rooms.createRoom(code.toString(), user); //creamos la sala
       socket.join(code.toString()); //para que el socket este asociado a la sala y cuando se emita un evento, solo se emita a los que esten en esa sala
       socket.data.roomCode = code.toString(); //guardamos el codigo de la sala en el socket
+      socket.data.name = user.name; //guardamos el nombre del usuario en el socket
       io.to(code.toString()).emit("updateState", state); //io es todo, code la sala que quiero y emit de la funcion updateState con el estado de la sala
       callback({ success: true });
     }
@@ -47,6 +48,7 @@ io.on("connection", (socket) => {
       rooms.joinRoom(roomCode, user);
       socket.join(roomCode);
       socket.data.roomCode = roomCode;
+      socket.data.name = user.name;
       io.to(roomCode).emit("updateState", state);
       callback({ success: true });
     }
@@ -108,13 +110,6 @@ io.on("connection", (socket) => {
     if (!state) return;
     game.leaveTeam(state, user);
 
-    state.messages.push({
-      team: "",
-      user: "",
-      message: `El jugador ${user.name} abandonó el equipo ${user.color}`,
-      isLog: true,
-    });
-
     io.to(code).emit("updateState", state);
   });
 
@@ -175,6 +170,13 @@ io.on("connection", (socket) => {
     if (!state) return;
 
     game.revealCard(state, card); // Revela la carta seleccionada
+
+    state.messages.push({
+      team: "",
+      user: "",
+      message: `El jugador ${socket.data.name} ha revelado la carta ${card.word}`,
+      isLog: true,
+    });
 
     io.to(roomCode).emit("updateState", state);
   });
