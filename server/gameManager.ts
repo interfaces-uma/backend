@@ -135,8 +135,7 @@ export const gameManager = (): GameManager => {
    * @param state - Estado de la partida a actualizar
    */
   const endGame = (state: GameState, winner: TeamColor) => {
-    //  Hay que definir en el type endGame
-    // io.to(state.code).emit("endGame", state, winner);
+    io.to(state.code).emit("endGame", winner);
   };
 
   /**
