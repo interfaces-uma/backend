@@ -73,11 +73,10 @@ export const gameManager = (): GameManager => {
       if (c.word === card.word) {
         cont++;
         c.isFlipped = true;
-        if (c.color !== state.turn.team) {
+        if (c.color === state.turn.team) {
           sameColor = true;
-          if (c.color === "black") {
-            blackCard = true;
-          }
+        } else if (c.color === "black") {
+          blackCard = true;
         }
       }
       return c;
