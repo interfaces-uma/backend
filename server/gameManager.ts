@@ -1,6 +1,7 @@
 import { roomManager } from "./roomManager";
-import type { Card, Clue, GameState, User } from "./types";
+import type { Card, Clue, GameState, TeamColor, User } from "./types";
 import { generateCards } from "./words";
+import { io } from "./index";
 
 // Metodos a usar del roomManager
 const { getRoom } = roomManager();
@@ -13,13 +14,14 @@ const { getRoom } = roomManager();
 export interface GameManager {
   startGame: (state: GameState) => void;
   revealCard: (state: GameState, card: Card) => void;
-  endGame: (state: GameState) => void;
+  endGame: (state: GameState, winner: TeamColor) => void;
   generateBoard: (state: GameState) => void;
   setClue: (state: GameState, clue: Clue) => void;
   changeTurn: (state: GameState) => void;
   resetGame: (state: GameState) => void;
   getGameState: (roomCode: string) => GameState | null;
   leaveTeam: (state: GameState, user: User) => void;
+  getOppositeTeam: (team: TeamColor) => TeamColor;
 }
 
 /**
@@ -65,13 +67,17 @@ export const gameManager = (): GameManager => {
    */
   const revealCard = (state: GameState, card: Card) => {
     let sameColor = false;
+    let blackCard = false;
 
     state.cards.map((c) => {
       if (c.word === card.word) {
         cont++;
         c.isFlipped = true;
-        if (c.color === state.turn.team) {
+        if (c.color !== state.turn.team) {
           sameColor = true;
+          if (c.color === "black") {
+            blackCard = true;
+          }
         }
       }
       return c;
@@ -86,15 +92,30 @@ export const gameManager = (): GameManager => {
       });
     }
 
-    if (!sameColor) {
+    if (blackCard) {
+      state.messages.push({
+        team: "",
+        user: "",
+        message: `El jugador ${state.turn.team} ha revelado la carta negra, el equipo ${state.turn.team} ha perdido.`,
+        isLog: true,
+      });
+      endGame(state, getOppositeTeam(state.turn.team));
+    } else if (!sameColor) {
       changeTurn(state);
       state.messages.push({
         team: "",
         user: "",
-        message: `El jugador ${state.turn.team} ha revelado la carta ${card.word}`,
+        message: `El equipo ${state.turn.team} ha revelado una carta del equipo contrario, pierde el turno.`,
         isLog: true,
       });
     } else {
+      if (
+        state.cards.filter((c) => c.isFlipped && c.color === state.turn.team)
+          .length === 0
+      ) {
+        endGame(state, state.turn.team);
+      }
+
       if (
         state.clue?.cards.length !== undefined &&
         cont === state.clue?.cards.length + 1
@@ -114,7 +135,10 @@ export const gameManager = (): GameManager => {
    * Modifica el estado del juego para finalizar la partida.
    * @param state - Estado de la partida a actualizar
    */
-  const endGame = (state: GameState) => {};
+  const endGame = (state: GameState, winner: TeamColor) => {
+    //  Hay que definir en el type endGame
+    // io.to(state.code).emit("endGame", state, winner);
+  };
 
   /**
    * Modifica el estado del juego para generar un nuevo tablero.
@@ -152,7 +176,7 @@ export const gameManager = (): GameManager => {
    */
   const changeTurn = (state: GameState) => {
     cont = 0;
-    state.clue = null;
+
     if (state.turn.role === "leader") {
       state.turn.role = "agent";
       state.messages.push({
@@ -162,6 +186,7 @@ export const gameManager = (): GameManager => {
         isLog: true,
       });
     } else {
+      state.clue = null;
       state.turn.role = "leader";
       state.turn.team = state.turn.team === "red" ? "blue" : "red";
       state.messages.push({
@@ -214,6 +239,11 @@ export const gameManager = (): GameManager => {
     });
   };
 
+  //para obtener el equipo contrario
+  const getOppositeTeam = (team: TeamColor): TeamColor => {
+    return team === "red" ? "blue" : "red";
+  };
+
   return {
     startGame,
     revealCard,
@@ -224,5 +254,6 @@ export const gameManager = (): GameManager => {
     resetGame,
     getGameState,
     leaveTeam,
+    getOppositeTeam,
   };
 };
