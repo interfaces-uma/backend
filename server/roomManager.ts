@@ -1,4 +1,4 @@
-import type { GameState, User } from "./types";
+import type { GameState, User, TeamColor } from "./types";
 import { logger } from "./utils";
 
 /**
