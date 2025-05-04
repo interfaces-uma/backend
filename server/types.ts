@@ -101,5 +101,5 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
   updateState: (state: GameState) => void;
   redirectGame: () => void;
-  endGame: (winner: TeamColor) => void;
+  endGame: (state: GameState, winner: TeamColor) => void;
 }

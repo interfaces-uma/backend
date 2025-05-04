@@ -109,7 +109,7 @@ export const gameManager = (): GameManager => {
       });
     } else {
       if (
-        state.cards.filter((c) => c.isFlipped && c.color === state.turn.team)
+        state.cards.filter((c) => !c.isFlipped && c.color === state.turn.team)
           .length === 0
       ) {
         endGame(state, state.turn.team);
@@ -135,7 +135,7 @@ export const gameManager = (): GameManager => {
    * @param state - Estado de la partida a actualizar
    */
   const endGame = (state: GameState, winner: TeamColor) => {
-    io.to(state.code).emit("endGame", winner);
+    io.to(state.code).emit("endGame", state, winner);
   };
 
   /**
