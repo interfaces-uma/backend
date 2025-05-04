@@ -39,6 +39,8 @@ export interface GameManager {
  *
  */
 export const gameManager = (): GameManager => {
+  let cont = 0;
+
   /**
    * Modifica el estado del juego para iniciar la partida.
    * Llama a generateBoard para generar el tablero inicial.
@@ -62,9 +64,15 @@ export const gameManager = (): GameManager => {
    * @param card - Carta seleccionada
    */
   const revealCard = (state: GameState, card: Card) => {
+    let sameColor = false;
+
     state.cards.map((c) => {
       if (c.word === card.word) {
+        cont++;
         c.isFlipped = true;
+        if (c.color === state.turn.team) {
+          sameColor = true;
+        }
       }
       return c;
     });
@@ -76,6 +84,29 @@ export const gameManager = (): GameManager => {
         }
         return c;
       });
+    }
+
+    if (!sameColor) {
+      changeTurn(state);
+      state.messages.push({
+        team: "",
+        user: "",
+        message: `El jugador ${state.turn.team} ha revelado la carta ${card.word}`,
+        isLog: true,
+      });
+    } else {
+      if (
+        state.clue?.cards.length !== undefined &&
+        cont === state.clue?.cards.length + 1
+      ) {
+        changeTurn(state);
+        state.messages.push({
+          team: "",
+          user: "",
+          message: "Limite de cartas reveladas alcanzado.",
+          isLog: true,
+        });
+      }
     }
   };
 
@@ -120,6 +151,8 @@ export const gameManager = (): GameManager => {
    * @param state - Estado de la partida a actualizar
    */
   const changeTurn = (state: GameState) => {
+    cont = 0;
+    state.clue = null;
     if (state.turn.role === "leader") {
       state.turn.role = "agent";
       state.messages.push({

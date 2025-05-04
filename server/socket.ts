@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode,
+      roomCode
     ) => {
       const state = rooms.getRoom(roomCode);
       if (!state) return;
@@ -102,7 +102,7 @@ io.on("connection", (socket) => {
       });
 
       io.to(roomCode).emit("updateState", state);
-    },
+    }
   );
 
   socket.on("leaveTeam", (code, user) => {
@@ -179,14 +179,14 @@ io.on("connection", (socket) => {
     const state = rooms.getRoom(roomCode);
     if (!state) return;
 
-    game.revealCard(state, card); // Revela la carta seleccionada
-
     state.messages.push({
       team: "",
       user: "",
       message: `El jugador ${socket.data.name} ha revelado la carta ${card.word}`,
       isLog: true,
     });
+
+    game.revealCard(state, card); // Revela la carta seleccionada
 
     io.to(roomCode).emit("updateState", state);
   });
