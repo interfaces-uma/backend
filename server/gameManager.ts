@@ -50,6 +50,7 @@ export const gameManager = (): GameManager => {
    */
   const startGame = (state: GameState) => {
     generateBoard(state);
+    state.isGameStarted = true;
     state.messages.push({
       team: "",
       user: "",
@@ -135,6 +136,7 @@ export const gameManager = (): GameManager => {
    * @param state - Estado de la partida a actualizar
    */
   const endGame = (state: GameState, winner: TeamColor) => {
+    state.isGameStarted = false;
     io.to(state.code).emit("endGame", state, winner);
   };
 
@@ -225,7 +227,7 @@ export const gameManager = (): GameManager => {
       state.teams[user.color].leader = null;
     } else {
       state.teams[user.color].agents = state.teams[user.color].agents.filter(
-        (agent) => agent.id !== user.id
+        (agent) => agent.id !== user.id,
       );
     }
     state.players.push(user);

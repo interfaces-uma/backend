@@ -36,6 +36,7 @@ export const roomManager = (): RoomManager => {
    */
   const createRoom = (code: string, user: User): GameState => {
     const initialState: GameState = {
+      isGameStarted: false,
       mode: "online",
       code,
       user: user,
@@ -81,7 +82,7 @@ export const roomManager = (): RoomManager => {
 
     logger.debug(
       `El usuario ${user.name} se unió a la sala ${code}`,
-      "RoomManager"
+      "RoomManager",
     );
 
     room.messages.push({
@@ -114,7 +115,7 @@ export const roomManager = (): RoomManager => {
     }
     logger.debug(
       `El usuario ${user.name} salió de la sala ${code}`,
-      "RoomManager"
+      "RoomManager",
     );
 
     room.messages.push({
