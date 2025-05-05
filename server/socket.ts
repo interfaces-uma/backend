@@ -120,8 +120,6 @@ io.on("connection", (socket) => {
     const state = rooms.getRoom(code);
     if (!state) return;
     game.leaveTeam(state, user);
-
-    io.to(code).emit("updateState", state);
   });
 
   socket.on("startGame", (roomCode, callback) => {

@@ -137,6 +137,7 @@ export const gameManager = (): GameManager => {
    */
   const endGame = (state: GameState, winner: TeamColor) => {
     state.isGameStarted = false;
+    state.clue = null;
     io.to(state.code).emit("endGame", state, winner);
   };
 
@@ -237,6 +238,7 @@ export const gameManager = (): GameManager => {
       message: `El jugador ${user.name} abandonó el equipo ${user.color}`,
       isLog: true,
     });
+    io.to(state.code).emit("updateState", state);
   };
 
   //para obtener el equipo contrario
