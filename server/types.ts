@@ -86,6 +86,7 @@ export interface ClientToServerEvents {
   joinTeam: (
     data: { user: User; color: TeamColor; role: Role },
     code: string,
+    callback: (response: { success: boolean; message?: string }) => void,
   ) => void;
   sendMessage: (message: Message, roomCode: string) => void;
   startGame: (

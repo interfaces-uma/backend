@@ -70,15 +70,20 @@ io.on("connection", (socket) => {
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
       roomCode,
+      callback,
     ) => {
       const state = rooms.getRoom(roomCode);
       if (!state) return;
-      if (user.color === color) return; // Si el usuario ya pertenece al equipo, no hace nada
+      if (user.color === color && user.role === role) return; // Si el usuario ya pertenece al equipo, no hace nada
 
-      user.color = color;
-      user.role = role;
       const team = state.teams[color];
 
+      // compruebo que el cambio sea valido
+      if (role === "leader" && team.leader !== null) {
+        callback({ success: false, message: "El slot ya está cogido" });
+        return;
+      }
+      // lo quito de su posicion actual
       for (const teamColor of ["red", "blue"]) {
         const t = state.teams[teamColor as "red" | "blue"];
         if (t.leader?.id === user.id) {
@@ -87,13 +92,17 @@ io.on("connection", (socket) => {
         t.agents = t.agents.filter((agent) => agent.id !== user.id);
       }
 
-      state.players = state.players.filter((player) => player.id !== user.id);
-
+      // lo añado a su nueva posicion
       if (role === "leader") {
         team.leader = user;
       } else {
         team.agents.push(user);
       }
+
+      state.players = state.players.filter((player) => player.id !== user.id);
+
+      user.color = color;
+      user.role = role;
 
       state.messages.push({
         team: "",
@@ -103,6 +112,7 @@ io.on("connection", (socket) => {
       });
 
       io.to(roomCode).emit("updateState", state);
+      callback({ success: true });
     },
   );
 
