@@ -1,5 +1,5 @@
 import { roomManager } from "./roomManager";
-import type { Card, Role, TeamColor, User, Clue } from "./types";
+import type { Card, Role, TeamColor, User, Clue, Message } from "./types";
 import { io, server, port } from "./index";
 import { gameManager } from "./gameManager";
 import { logger } from "./utils";
@@ -9,12 +9,13 @@ const rooms = roomManager();
 
 io.on("connection", (socket) => {
   logger.debug(`El usuario ${socket.id} se ha conectado`, "Socket");
-  socket.on("sendMessage", (data, roomCode) => {
+  socket.on("sendMessage", (data: Message, roomCode) => {
     const state = rooms.getRoom(roomCode);
     if (!state) return;
     state?.messages.push(data);
     logger.debug(`El usuario ${data.user} ha enviado un mensaje`, "Socket");
-    io.to(roomCode).emit("updateState", state);
+    // io.to(roomCode).emit("updateState", state);
+    io.to(roomCode).emit("updateMessages", data);
   });
 
   socket.on("createRoom", (user, callback) => {
@@ -68,7 +69,7 @@ io.on("connection", (socket) => {
     "joinTeam",
     (
       { user, color, role }: { user: User; color: TeamColor; role: Role },
-      roomCode
+      roomCode,
     ) => {
       const state = rooms.getRoom(roomCode);
       if (!state) return;
@@ -102,7 +103,7 @@ io.on("connection", (socket) => {
       });
 
       io.to(roomCode).emit("updateState", state);
-    }
+    },
   );
 
   socket.on("leaveTeam", (code, user) => {
