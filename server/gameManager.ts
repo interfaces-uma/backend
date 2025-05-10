@@ -231,13 +231,15 @@ export const gameManager = (): GameManager => {
         (agent) => agent.id !== user.id,
       );
     }
-    state.players.push(user);
     state.messages.push({
       team: "",
       user: "",
       message: `El jugador ${user.name} abandonó el equipo ${user.color}`,
       isLog: true,
     });
+    user.color = null;
+    user.role = "spectator";
+    state.players.push(user);
     io.to(state.code).emit("updateState", state);
   };
 
