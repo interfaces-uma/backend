@@ -98,11 +98,13 @@ export interface ClientToServerEvents {
   guessCard: (card: Card) => void;
   leaveTeam: (code: string, user: User) => void;
   nextTurn: () => void;
+  resetGame: (roomCode: string, user: User) => void;
 }
 
 export interface ServerToClientEvents {
   updateState: (state: GameState) => void;
   redirectGame: () => void;
+  redirectLobby: () => void;
   endGame: (state: GameState, winner: TeamColor) => void;
   updateMessages: (message: Message) => void;
 }

@@ -37,7 +37,13 @@ io.on("connection", (socket) => {
       callback({ success: true });
     }
   });
-
+  socket.on("resetGame", (roomCode, user) => {
+    const state = rooms.getRoom(roomCode);
+    if (!state) return;
+    game.resetGame(state);
+    io.to(roomCode).emit("updateState", state);
+    io.to(roomCode).emit("redirectLobby");
+});
   socket.on("joinRoom", (user, roomCode, callback) => {
     const state = rooms.getRoom(roomCode);
     if (!state) {
@@ -182,7 +188,6 @@ io.on("connection", (socket) => {
 
     io.to(roomCode).emit("updateState", state);
   });
-
   socket.on("guessCard", (card: Card) => {
     const roomCode = socket.data.roomCode;
     const state = rooms.getRoom(roomCode);

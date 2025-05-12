@@ -208,6 +208,7 @@ export const gameManager = (): GameManager => {
   const resetGame = (state: GameState) => {
     state.cards = [];
     state.clue = null;
+    state.isGameStarted = false;
     generateBoard(state);
   };
 
