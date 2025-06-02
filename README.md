@@ -1,5 +1,11 @@
 # Código Secreto Backend
 
+### Equipo L
+- **Salma Boulagna Moreno** - CTO y CIO - salmabm0416@gmail.com
+- **Carlos Rodríguez Martín** - COO - carlosrodriguezmartin2004@gmail.com
+- **Miguel Ángel Dorado Maldonado** - CEO - miguelangeldorado10@gmail.com
+- **José Ruiz Pareja** - CXO - joseruizparejaa@gmail.com
+
 ### Installation
 
 1. Clone the repository:
